@@ -1,5 +1,5 @@
 # XETTER 2
 
-You can assemble this source code by Carry lab's SuperBASE.
+You can assemble these source codes by Carry lab's SuperBASE.
 
-The assembled binary is on https://xetter.com/ .
+The assembled binaries are on https://xetter.com/ .
