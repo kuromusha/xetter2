@@ -1,0 +1,1418 @@
+;
+;  XETTER 2
+;     for S-OS
+;
+; Mar. 26, 1986
+;     by K.Kuromusha
+;
+ OFFSET $0500
+ START  $3000
+;
+;Object ƒ $3500~
+;
+GAMEN EQU GAMN+41
+;
+ GOTO START
+;
+VC    [AF A=$C !$1FF4 ]AF RET
+;
+SHOKI !$1FD6    ;NO PRINTER
+ A=40 !$2030    ;WIDTH 40
+ !DCLR
+ RET
+;
+DCLR   (SSP+1)=SP SP=END+$6F54
+ HL=$2020 DO B=190
+ !(E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5)
+ !(E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5)
+ !(E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5)
+ !(E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5)
+ !(E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5)
+ UNTIL DEC(B)=0
+ (SHL+1)=SP
+SSP   SP=0
+SHL   HL=0 DE=190
+ DO B=150
+ (HL)="6"
+ HL=HL+DE
+ UNTIL DEC(B)=0
+ RET
+;
+START !SHOKI
+L0    !DEMO
+L1    A=(MEN)
+ IF A=251 THEN A=101 (MEN)=A
+ !S3
+LOOP  !IMOVE
+ !SSC
+ A=(BOM)
+ IF A=1 GOTO BOMY
+ A=(CLR)
+ IF A=0 GOTO CLR1
+ !EMOVE
+ A=(BOM)
+ IF A=1 GOTO BOMY0
+ !YMOVE
+ HL=(TIME)
+ HL-
+ (TIME)=HL
+ !SSC
+ A=(BOM)
+ IF A=1 GOTO BOMY
+ HL=(TIME)
+ IF HL=0 GOTO BOMY
+ GOTO LOOP
+;
+SC    DEFS 2
+HI    DEFS 2
+BOM   DEFS 1
+CLR   DEFS 1
+MEN   DEFS 1
+MY    DEFS 1
+ED    DEFS 1
+;
+DEM0  !(1C0D0D0D)
+      !("*   * ***** ********** ***** ****  #####")
+      !(" * *  *       *    *   *     *   *  # # ")
+      !("  *   ****    *    *   ****  ****   # # ")
+      !(" * *  *       *    *   *     * *    # # ")
+      !("*   * *****   *    *   ***** *  ** #####")
+      !(0D0D)
+      !("    Copyright(C)1986 by K.Kuromusha")
+      !(0D0D0D0D0D0D)
+      !("     Push 1 or 2 key.                   "0D)
+      !("        1. CONSTRUCTION GAME"0D)
+      !("        2. CONSTRUCTION EDITOR"00)
+;
+WAIT  [BC
+ DO B=0
+ C=0
+W1    C-
+ IF C<>0 GOTO W1
+ UNTIL DEC(B)=0
+ ]BC RET
+;
+WAIT0 [BC
+ DO B=0
+ UNTIL DEC(B)=0
+ ]BC RET
+;
+DEMO  !VC
+ HL=0 (SC)=HL
+ A=0 (ED)=A
+ A=5 (MY)=A
+ DE=DEM0 !$1FE5
+KDEMO !$1FD0
+ IF A="1" GOTO CNSTG
+ IF A="2" GOTO EDIT
+ GOTO KDEMO
+;
+COSKB EXX H=A EXX !$1FF4 !$1FC4 !WAIT
+COSK3 !$1FD0
+ IF A<"0" GOTO COSK3
+ IF A>="6" GOTO COSK3
+ D=A !$1FF4 AF<>AF' !$1FC4 !WAIT AF<>AF'
+ IF A="5" GOTO COSK6
+COSK4 !$1FD0
+ IF A<"0" GOTO COSK4
+ IF A>=":" GOTO COSK4
+ GOTO COSK5
+;
+COSK6 !$1FD0
+ IF A<>"0" GOTO COSK6
+ GOTO COSK5
+;
+COSK7 !$1FD0
+ IF A<"1" GOTO COSK7
+ IF A>=":" GOTO COSK7
+ GOTO COSK5
+;
+COSK0 !$1FD0
+ IF A="1" GOTO COSKA
+ IF A="2" GOTO COSKB
+ GOTO COSK0
+COSKA EXX H=A EXX !$1FF4 !$1FC4 !WAIT
+COSK1 !$1FD0
+ IF A<"0" GOTO COSK1
+ IF A>=":" GOTO COSK1
+ D=A !$1FF4 AF<>AF' !$1FC4 !WAIT AF<>AF'
+ IF A="0" GOTO COSK7
+COSK2 !$1FD0
+ IF A<"0" GOTO COSK2
+ IF A>=":" GOTO COSK2
+COSK5 !$1FF4 AF<>AF' !$1FC4 !WAIT AF<>AF'
+ E=$30 A=A-E C=A A=D
+ A=A-E B=A B+ A=246
+ DO
+ A=A+10
+ UNTIL DEC(B)=0
+ A=A+C C=A EXX A=H EXX
+ A=A-E B=A A=0
+ DO
+ A=A+100
+ UNTIL DEC(B)=0
+ A=A+C (MEN)=A
+ RET
+;
+CNSTG !VC DE=CNSTD !$1FE5 !WAIT
+ H=1 L=33 !$201E !COSK0
+ RET
+;
+CNSTD !(1C0D"  ÅÝÒÝ ¶× Ê¼ÞÒÏ½¶ (101-250) ?   ¢???£"00)
+EDITD !(1C0D"ÅÝÒÝ ¦ ´ÃÞ¨¯Ä ¼Ï½¶ (101-250) ?  ¢???£"00)
+;
+PUT   [HL [DE [BC [AF
+ A=(GX) C=A
+ A=(GY) B=A
+ HL=GAMEN-40
+ DE=BC
+ D=0
+ HL=HL+DE DE=40
+ DO B+
+ HL=HL+DE
+ UNTIL DEC(B)=0
+ A=(GZ)
+ [AF
+ (HL+)=A (HL)=A
+ DE=39 HL=HL+DE
+ (HL+)=A (HL)=A
+ A=(GX) A+ L=A
+ A=(GY) A=A+4 H=A !$201E
+ ]AF
+ DE=GC0-6 A+
+ DO B=A
+ DE++ DE++ DE++
+ UNTIL DEC(B)=0
+ !$1FE5 !$2018 H+ L-- !$201E
+ DE++ DE+ !$1FE5
+ ]AF ]BC ]DE ]HL
+ RET
+;
+GX    DEFS 1
+GY    DEFS 1
+GZ    DEFS 1
+;
+GAMN  !("")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("                                      ")
+ !("")
+;
+GC0   !("  "00"  "00)
+GC1   !("VV"00"><"00)
+GC2   !("()"00"´´"00)
+GC3   !("()"00"=="00)
+GC4   !("OO"00"OO"00)
+GC5   !("##"00"##"00)
+GC6   !("**"00"<>"00)
+GCBOM !("@+"00"+@"00)
+CURN  !("ÛÛ"00"ÛÛ"00)
+GC10  !("I>"00)
+GC11  !(">V"00)
+GC12  !(")#"00)
+;
+SPUT  [HL [DE [BC [AF
+ A=(GX) C=A
+ A=(GY) B=A
+ HL=GAMEN-40
+ DE=BC
+ D=0
+ HL=HL+DE DE=40
+ DO B=B+1
+ HL=HL+DE
+ UNTIL DEC(B)=0
+ A=(GZ)
+ (HL+)=A (HL)=A
+ A=(GX) A+ L=A
+ A=(GY) A=A+4 H=A !$201E
+ A=(GZ)
+ DE=GC0
+ IF A=10 THEN DE=GC10
+ IF A=11 THEN DE=GC11
+ IF A=12 THEN DE=GC12
+ !$1FE5
+ ]AF ]BC ]DE ]HL
+ RET
+;
+WALLS A="#" !$1FF4
+ RET
+;
+WALL  [BC [DE [HL [AF
+ IF A<>0 THEN !VVC GOTO WALL0
+ !VC
+WALL0
+ DO B=38
+ L=B H=0 !$201E !WALLS
+ L=B H=3 !$201E !WALLS
+ L=B H=24 !$201E !WALLS
+ UNTIL DEC(B)=0
+ DO B=23
+ L=0 H=B !$201E !WALLS
+ L=39    !$201E !WALLS
+ UNTIL DEC(B)=0
+ DO B=2
+ L=17 H=B !$201E !WALLS
+ L=27     !$201E !WALLS
+ UNTIL DEC(B)=0
+ ]AF ]HL ]DE ]BC
+ RET
+;
+MYX   DEFS 1
+MYY   DEFS 1
+;
+T11   DEFS 3
+T12   DEFS 3
+T13   DEFS 3
+T14   DEFS 3
+T21   DEFS 3
+T22   DEFS 3
+T23   DEFS 3
+T24   DEFS 3
+;
+IWA1  DEFS 3
+IWA2  DEFS 3
+IWA3  DEFS 3
+IWA4  DEFS 3
+IWA5  DEFS 3
+IWA6  DEFS 3
+IWA7  DEFS 3
+IWA8  DEFS 3
+IWA9  DEFS 3
+IWA10 DEFS 3
+IWA11 DEFS 3
+IWA12 DEFS 3
+IWA13 DEFS 3
+IWA14 DEFS 3
+IWA15 DEFS 3
+;
+TIME  DEFS 2
+;
+S3    !VC
+ A=0
+ (BOM)=A
+ (CLR)=A
+ (MYX)=A
+ (MYY)=A
+ HL=1500
+ (TIME)=HL
+ HL=T11
+ (HL)=0
+ DE=T11+1
+ BC=68
+ LDIR
+ HL=END-190
+ A=(MEN) A=A-100
+ DO DE=190
+ HL=HL+DE
+ UNTIL DEC(A)=0
+ !WALL
+ E=0
+S3S1  D=0
+S3S2  A=(HL)
+ [HL
+ !TOROK
+ ]HL
+ (GZ)=A
+ A=D (GX)=A
+ A=E (GY)=A
+ !PUT
+ HL+
+ D++
+ A=38
+ IF A<>D GOTO S3S2
+ E++
+ A=20
+ IF A<>E GOTO S3S1
+ DE=S3D1 L=0 H=1 !$201E !$1FE8
+ DE=S3D2 L=0 H=2 !$201E !$1FE8
+ L=28 H=1 !$201E
+ DE=GC6 A=(MY)
+S3S3  IF DEC(A)=0 GOTO S3S4
+ [AF [DE !$1FE5 DE++ DE+ H+ !$201E
+ !$1FE5 H- L++ !$201E
+ ]DE ]AF GOTO S3S3
+S3S4  !SSC A=(ED) IF A<>0 RET
+ DO A=3
+ !WAIT
+ UNTIL DEC(A)=0
+ RET
+;
+TOROK IF A=" " THEN A=0 RET
+ IF A="6" THEN A=6 RET
+ IF A="5" THEN A=5 RET
+ IF A="4" THEN A=(CLR) A=A+4 (CLR)=A A=4 RET
+ IF A="3" GOTO TR3
+ IF A="2" GOTO TR2
+ IF A="1" GOTO TR1
+ RET
+;
+TR1   HL=T11+2
+TR1S  A=(HL)
+ IF A<>0 THEN HL++ HL+ GOTO TR1S
+ (HL)=1 HL-
+ (HL)=E HL-
+ (HL)=D
+ A=1 RET
+;
+TR2   HL=T21+2
+TR2S  A=(HL)
+ IF A<>0 THEN HL++ HL+ GOTO TR2S
+ (HL)=1 HL-
+ (HL)=E HL-
+ (HL)=D
+ A=2 RET
+;
+TR3   HL=IWA1+2
+TR3S  A=(HL)
+ IF A<>0 THEN HL++ HL+ GOTO TR3S
+ (HL)=1 HL-
+ (HL)=E HL-
+ (HL)=D
+ A=3 RET
+;
+S3D1  !("#HI-SCORE        #SCENE"0D)
+S3D2  !("#   SCORE        #TIME"0D)
+;
+SSCD1 !("     0"0D)
+;
+SSC   [BC [DE [HL [AF
+ HL=(SC) [HL
+ DE<>HL
+ HL=(HI) CY=0
+ HL=HL-DE
+ IF CY THEN ]HL [HL (HI)=HL
+ ]HL
+ !SSCS
+ L=11 H=2 !$201E
+ DE=SSCD1 !SCS
+ !$1FE8
+ HL=(HI)
+ !SSCS
+ L=11 H=1 !$201E
+ DE=SSCD1 !SCS
+ !$1FE8
+ HL=(TIME)
+ !SSCS
+ L=23 H=2 !$201E
+ DE=SSCD1+1 !SCS0
+ HL=SSCD1+5
+ (HL)=$0D
+ !$1FE8
+ (HL)="0"
+ HL=(MEN)
+ H=0
+ !SSCS
+ L=24 H=1 !$201E
+ DE=SSCD1+2 !SCS
+ HL=SSCD1+5
+ (HL)=$0D
+ !$1FE8
+ (HL)="0"
+ ]AF ]HL ]DE ]BC
+ RET
+;
+SSCS  CY=0
+ DE=10000 C=0 B=$30
+SSCS1 HL=HL-DE
+ IF NC THEN C+ GOTO SSCS1
+ HL=HL+DE A=C A=A+B
+ (SSCD1)=A
+ DE=1000 C=0
+SSCS2 HL=HL-DE
+ IF NC THEN C+ GOTO SSCS2
+ HL=HL+DE A=C A=A+B
+ (SSCD1+1)=A
+ DE=100 C=0
+SSCS3 HL=HL-DE
+ IF NC THEN C+ GOTO SSCS3
+ HL=HL+DE A=C A=A+B
+ (SSCD1+2)=A
+ DE=10 C=0
+SSCS4 HL=HL-DE
+ IF NC THEN C+ GOTO SSCS4
+ HL=HL+DE A=C A=A+B
+ (SSCD1+3)=A
+ A=L A=A+B
+ (SSCD1+4)=A
+ RET
+;
+SCS   [AF [HL [BC
+ HL=SSCD1
+ DO B=5
+ A=(HL)
+ IF A<>"0" GOTO SCSS
+ A=" "
+ (HL+)=A
+ UNTIL DEC(B)=0
+SCSS  ]BC ]HL ]AF
+ RET
+;
+SCS0  [AF [HL [BC
+ HL=SSCD1+1
+ DO B=3
+ A=(HL)
+ IF A<>"0" GOTO SCSS
+ A=" "
+ (HL+)=A
+ UNTIL DEC(B)=0
+ GOTO SCSS
+;
+BOMY0 DO B=15
+ !$1FC4 UNTIL DEC(B)=0
+ A=(MY) A-
+ (MY)=A
+ IF A<>0 GOTO L1
+ DO B=3 !$1FC4 DO A=B !WAIT
+ UNTIL DEC(A)=0 UNTIL DEC(B)=0
+ A=1 !WALL
+ DE=BOMYD L=0 H=13 !$201E
+ !$1FE8
+ DO B=8
+ !WAIT
+ UNTIL DEC(B)=0
+ GOTO L0
+;
+BOMY  A=7 (GZ)=A
+ A=(MYX) (GX)=A
+ A=(MYY) (GY)=A
+ !PUT GOTO BOMY0
+;
+BOMYD !("#              GAME OVER"0D)
+;
+CLR1  HL=(SC)
+ DE=100
+ HL=HL+DE
+ (SC)=HL
+ !SSC !WAIT
+ DO B=5 !$1FC4 A=B DO A=A+A !WAIT0
+ UNTIL DEC(A)=0 UNTIL DEC(B)=0
+ A=(MEN) A+
+ (MEN)=A
+ GOTO L1
+;
+IMOVE DO B=35
+ !WAIT0 UNTIL DEC(B)=0
+ !$1FD0
+ IF A="H" GOTO IM4
+ IF A="K" GOTO IM6
+ IF A="M" GOTO IM2
+ IF A="U" GOTO IM8
+ IF A="!" THEN A=1 (BOM)=A
+ RET
+;
+IM4   HL=(MYX)
+ !XHL
+ HL- A=(HL)
+ B=A DE=40
+ HL=HL+DE
+ A=(HL)
+ IF A<>B GOTO IM4S
+ IF A=5 GOTO IM4P
+ IF A=4 THEN A=(CLR) A-- (CLR)=A HL=(SC) HL++ (SC)=HL A=5
+ IF A=2 THEN A=1
+ IF A=1 THEN (BOM)=A
+ IF A=3 GOTO IM4E
+IM4PS HL=(MYX)
+ (GX)=HL
+ A=0 (GZ)=A
+ !PUT
+ A=(MYX)
+ A- (MYX)=A
+IM4P  HL=(MYX)
+ (GX)=HL
+ A=6 (GZ)=A
+ !PUT
+ RET
+;
+IM4E  HL=(MYX)
+ !XHL
+ HL-- HL-
+ A=(HL) B=A
+ DE=40 HL=HL+DE
+ A=(HL)
+ IF A<>B GOTO IM4P
+ IF A<>0 GOTO IM4P
+ A=4 !ISECH
+ IF HL=0 GOTO IM4P
+ A=(HL) A-
+ (HL)=A
+ HL=(MYX) L--
+ (GX)=HL
+ A=0 (GZ)=0
+ !PUT
+ L-
+ (GX)=HL
+ A=3 (GZ)=A
+ !PUT
+ GOTO IM4PS
+;
+ISECH HL=(MYX)
+ IF A=4 THEN L--
+ IF A=6 THEN L++
+ BC=IWA1 DE=HL A=0
+ISH0  [AF A=(BC) BC+
+ L=A A=(BC)
+ H=A BC+
+ A=(BC) BC+
+ IF A=0 GOTO ISH1
+ HL=HL-DE
+ IF H<>0 GOTO ISH1
+ IF L<>0 GOTO ISH1
+ ]AF BC-- BC-
+ HL=BC
+ RET
+;
+ISH1  ]AF A+
+ IF A=15 THEN HL=0 RET
+ GOTO ISH0
+;
+IM6   HL=(MYX)
+ !XHL
+ HL++ A=(HL)
+ B=A
+ DE=40 HL=HL+DE
+ A=(HL)
+ IF A<>B GOTO IM6S
+ IF A=5 GOTO IM6P
+ IF A=4 THEN A=(CLR) A-- (CLR)=A HL=(SC) HL++ (SC)=HL A=5
+ IF A=2 THEN A=1
+ IF A=1 THEN (BOM)=A
+ IF A=3 GOTO IM6E
+IM6PS HL=(MYX)
+ (GX)=HL
+ A=0 (GZ)=A
+ !PUT
+ A=(MYX)
+ A+ (MYX)=A
+IM6P  HL=(MYX)
+ (GX)=HL
+ A=6 (GZ)=A
+ !PUT
+ RET
+;
+IM6E  HL=(MYX)
+ !XHL
+ HL++ HL++
+ A=(HL) B=A
+ DE=40 HL=HL+DE
+ A=(HL)
+ IF A<>B GOTO IM6P
+ IF A<>0 GOTO IM6P
+ A=6 !ISECH
+ IF HL=0 GOTO IM6P
+ A=(HL) A+
+ (HL)=A
+ HL=(MYX) L++
+ (GX)=HL
+ A=0 (GZ)=0
+ !PUT
+ L+
+ (GX)=HL
+ A=3 (GZ)=A
+ !PUT
+ GOTO IM6PS
+;
+IM2   HL=(MYX)
+ !XHL DE=80
+ HL=HL+DE A=(HL)
+ B=A
+ HL+
+ A=(HL)
+ IF A<>B GOTO IM2S
+ IF A=5 GOTO IM2P
+ IF A=4 THEN A=(CLR) A-- (CLR)=A HL=(SC) HL++ (SC)=HL A=5
+ IF A=2 THEN A=1
+ IF A=1 THEN (BOM)=A
+ IF A=3 GOTO IM2P
+IM2PS HL=(MYX)
+ (GX)=HL
+ A=0 (GZ)=A
+ !PUT
+ A=(MYY)
+ A+ (MYY)=A
+IM2P  HL=(MYX)
+ (GX)=HL
+ A=6 (GZ)=A
+ !PUT
+ RET
+;
+IM8   HL=(MYX)
+ !XHL DE=40
+ HL=HL-DE A=(HL)
+ B=A
+ HL+
+ A=(HL)
+ IF A<>B GOTO IM8S
+ IF A=5 GOTO IM8P
+ IF A=4 THEN A=(CLR) A-- (CLR)=A HL=(SC) HL++ (SC)=HL A=5
+ IF A=2 THEN A=1
+ IF A=1 THEN (BOM)=A
+ IF A=3 GOTO IM8P
+IM8PS HL=(MYX)
+ (GX)=HL
+ A=0 (GZ)=A
+ !PUT
+ A=(MYY)
+ A- (MYY)=A
+IM8P  HL=(MYX)
+ (GX)=HL
+ A=6 (GZ)=A
+ !PUT
+ RET
+;
+XHL   [DE [BC [AF
+ DE=HL
+ HL=GAMEN-40
+ B=D D=0
+ HL=HL+DE DE=40
+ DO B+
+ HL=HL+DE
+ UNTIL DEC(B)=0
+ ]AF ]BC ]DE
+ RET
+;
+IM4S  IF A=5 GOTO IM4P
+ B-- B-- B- IF B=0 GOTO IM4P
+ IF A=3 GOTO IM4P
+ B++ IF B=0 GOTO IM4P
+ B+ IF A=1 THEN IF B=0 GOTO IM4SA
+ B+ IF A=2 THEN IF B=0 GOTO IM4SA
+ B+ IF A=1 THEN IF B=0 GOTO IM4SA
+ B- IF B=0 THEN IF A=0 GOTO IM4SA
+ B+ IF A=2 THEN IF B=0 GOTO IM4SA
+ B-- IF B=0 THEN IF A=0 GOTO IM4SA
+ B-- IF A=1 THEN IF B=0 GOTO IM4SB
+ B++ B+ IF B=0 THEN IF A=4 GOTO IM4SB
+ B-- B- IF A=2 THEN IF B=0 GOTO IM4SB
+ B++ IF B=0 THEN IF A=4 GOTO IM4SB
+ HL=(SC) HL+ (SC)=HL A=(CLR) A- (CLR)=A GOTO IM4PS
+IM4SA A=1 (BOM)=A GOTO IM4PS
+IM4SB A=1 (BOM)=A HL=(SC) HL+ (SC)=HL
+ A=(CLR) A- (CLR)=A GOTO IM4PS
+;
+IM6S  IF A=5 GOTO IM6P
+ B-- B-- B- IF B=0 GOTO IM6P
+ IF A=3 GOTO IM6P
+ B++ IF B=0 GOTO IM6P
+ B+ IF A=1 THEN IF B=0 GOTO IM6SA
+ B+ IF A=2 THEN IF B=0 GOTO IM6SA
+ B+ IF A=1 THEN IF B=0 GOTO IM6SA
+ B- IF B=0 THEN IF A=0 GOTO IM6SA
+ B+ IF A=2 THEN IF B=0 GOTO IM6SA
+ B-- IF B=0 THEN IF A=0 GOTO IM6SA
+ B-- IF A=1 THEN IF B=0 GOTO IM6SB
+ B++ B+ IF B=0 THEN IF A=4 GOTO IM6SB
+ B-- B- IF A=2 THEN IF B=0 GOTO IM6SB
+ B++ IF B=0 THEN IF A=4 GOTO IM6SB
+ HL=(SC) HL+ (SC)=HL A=(CLR) A- (CLR)=A GOTO IM6PS
+IM6SA A=1 (BOM)=A GOTO IM6PS
+IM6SB A=1 (BOM)=A HL=(SC) HL+ (SC)=HL
+ A=(CLR) A- (CLR)=A GOTO IM6PS
+;
+IM2S  IF A=5 GOTO IM2P
+ B-- B-- B- IF B=0 GOTO IM2P
+ IF A=3 GOTO IM2P
+ B++ IF B=0 GOTO IM2P
+ B+ IF A=1 THEN IF B=0 GOTO IM2SA
+ B+ IF A=2 THEN IF B=0 GOTO IM2SA
+ B+ IF A=1 THEN IF B=0 GOTO IM2SA
+ B- IF B=0 THEN IF A=0 GOTO IM2SA
+ B+ IF A=2 THEN IF B=0 GOTO IM2SA
+ B-- IF B=0 THEN IF A=0 GOTO IM2SA
+ B-- IF A=1 THEN IF B=0 GOTO IM2SB
+ B++ B+ IF B=0 THEN IF A=4 GOTO IM2SB
+ B-- B- IF A=2 THEN IF B=0 GOTO IM2SB
+ B++ IF B=0 THEN IF A=4 GOTO IM2SB
+ HL=(SC) HL+ (SC)=HL A=(CLR) A- (CLR)=A GOTO IM2PS
+IM2SA A=1 (BOM)=A GOTO IM2PS
+IM2SB A=1 (BOM)=A HL=(SC) HL+ (SC)=HL
+ A=(CLR) A- (CLR)=A GOTO IM2PS
+;
+IM8S  IF A=5 GOTO IM8P
+ B-- B-- B- IF B=0 GOTO IM8P
+ IF A=3 GOTO IM8P
+ B++ IF B=0 GOTO IM8P
+ B+ IF A=1 THEN IF B=0 GOTO IM8SA
+ B+ IF A=2 THEN IF B=0 GOTO IM8SA
+ B+ IF A=1 THEN IF B=0 GOTO IM8SA
+ B- IF B=0 THEN IF A=0 GOTO IM8SA
+ B+ IF A=2 THEN IF B=0 GOTO IM8SA
+ B-- IF B=0 THEN IF A=0 GOTO IM8SA
+ B-- IF A=1 THEN IF B=0 GOTO IM8SB
+ B++ B+ IF B=0 THEN IF A=4 GOTO IM8SB
+ B-- B- IF A=2 THEN IF B=0 GOTO IM8SB
+ B++ IF B=0 THEN IF A=4 GOTO IM8SB
+ HL=(SC) HL+ (SC)=HL A=(CLR) A- (CLR)=A GOTO IM8PS
+IM8SA A=1 (BOM)=A GOTO IM8PS
+IM8SB A=1 (BOM)=A HL=(SC) HL+ (SC)=HL
+ A=(CLR) A- (CLR)=A GOTO IM8PS
+;
+EMOVE HL=IWA1
+ DO B=15
+ !EMS
+ A=(BOM)
+ IF A=1 RET
+ HL++ HL+
+ UNTIL DEC(B)=0
+ RET
+;
+EMS   [HL [BC
+ (EMSMC)=0
+ DE=HL
+ HL++ A=(HL)
+ IF A=0 THEN ]BC ]HL RET
+ HL--
+ HL=(HL)
+ !XHL
+ HL=HL+80
+ A=(HL)
+ IF A=5 THEN ]BC ]HL RET
+ IF A=4 THEN ]BC ]HL RET
+ IF A=3 THEN ]BC ]HL RET
+ B=A HL+
+ A=(HL)
+ IF A=5 THEN ]BC ]HL RET
+ IF A=4 THEN ]BC ]HL RET
+ IF A=3 THEN ]BC ]HL RET
+ IF A=0 THEN IF B=0 GOTO EMS1
+ !EMS0
+EMS1  HL=DE
+ HL=(HL)
+ (GX)=HL
+ (GZ)=0
+ !PUT
+ HL=DE HL+
+ A=(HL) A+
+ (HL)=A HL-
+ HL=(HL)
+ (GX)=HL
+ (GZ)=3
+ !PUT
+EMS2  A=(EMSMC)
+ IF A<>0 THEN A- (EMSMC)=A !$1FC4 GOTO EMS2
+ ]BC ]HL
+ RET
+;
+EMS0  IF A<>B GOTO EMS0S
+ IF A=6 GOTO IDED
+ HL=DE HL=(HL)
+ !ESECH
+ IF HL=0 GOTO EMS0S
+ (EMSMC)=1
+ HL++ A=2
+ (HL)=A
+ HL- A=(HL)
+ A+ (HL)=A
+ HL- HL=(HL)
+ (GX)=HL
+ A=B A=A+10
+ (GZ)=A
+ !SPUT
+ HL=(SC)
+ HL=HL+20
+ (SC)=HL
+ RET
+;
+IDED  A=1 (BOM)=A
+ A=(MYY)
+ A+ (MYY)=A
+ HL=(MYX)
+ (GX)=HL
+ A=10 (GZ)=A
+ !SPUT
+ RET
+;
+ESECH [DE [BC
+ H++ DE=HL
+ BC=T11 A=0
+ESE   [AF A=(BC) BC+
+ L=A A=(BC)
+ H=A BC+
+ A=(BC) BC+
+ IF A=2 GOTO ESES
+ IF A=0 GOTO ESES
+ HL=HL-DE
+ IF H<>0 GOTO ESES
+ IF L<>0 GOTO ESES
+ ]AF BC-- BC-
+ HL=BC
+ ]BC ]DE
+ RET
+;
+ESES  ]AF A+
+ IF A=8 THEN ]BC ]DE HL=0 RET
+ GOTO ESE
+;
+EMSMC DEFS 1
+;
+EMS0S HL=DE
+ HL=(HL) !XHL
+ HL=HL+79
+ EXX
+ HL=0
+ EXX
+ A=(HL)
+ IF A=6 GOTO EMI
+ [AF !SECH
+ IF HL=0 THEN ]AF GOTO EMS1S
+ (EMSMC)=1
+ [HL
+ HL=(HL)
+ (GX)=HL
+ (GZ)=0
+ !PUT ]HL
+ ]AF HL++ B=A
+ A=2 (HL)=A
+ HL- A=(HL)
+ A+ (HL)=A
+ HL-
+ HL=(HL)
+ (GX)=HL
+ A=B
+ A=A+10
+ (GZ)=A
+ !SPUT
+ HL=(SC)
+ HL=HL+20
+ (SC)=HL
+EMS1S HL=DE
+ HL=(HL) !XHL
+ HL=HL+81
+ EXX
+ HL=1
+ EXX
+ A=(HL)
+ IF A=6 GOTO EMI
+ [AF !SECH
+ IF HL=0 THEN ]AF RET
+ [HL HL=EMSMC (HL)+ ]HL
+ [HL HL=(HL)
+ (GX)=HL
+ A=0 (GZ)=A
+ !PUT ]HL
+ ]AF HL++ B=A
+ A=2 (HL)=A
+ HL- A=(HL)
+ A+ (HL)=A
+ HL-
+ HL=(HL)
+ (GX)=HL
+ A=B
+ A=A+10
+ (GZ)=A
+ !SPUT
+ HL=(SC)
+ HL=HL+20
+ (SC)=HL
+ RET
+;
+SECH  [DE
+ HL=DE HL=(HL) H++
+ L+ DE=HL BC=T11
+ EXX [HL EXX ]HL
+ IF HL=0 THEN E--
+ A=0
+SECH1 [AF A=(BC) BC+
+ L=A A=(BC)
+ H=A BC+
+ A=(BC) BC+
+ IF A=2 GOTO SECH2
+ IF A=0 GOTO SECH2
+ HL=HL-DE
+ IF H<>0 GOTO SECH2
+ IF L<>0 GOTO SECH2
+ ]AF BC-- BC-
+ HL=BC
+ ]DE
+ RET
+;
+SECH2 ]AF A+
+ IF A=8 THEN ]DE HL=0 RET
+ GOTO SECH1
+;
+EMI   (BOM)=1
+ HL=(MYX)
+ (GX)=HL
+ (GZ)=0
+ !PUT
+ A=(MYY)
+ A+ (MYY)=A
+ HL=(MYX)
+ (GX)=HL
+ A=10 (GZ)=A
+ !SPUT
+ EXX
+ [HL
+ EXX
+ ]HL
+ IF HL=0 GOTO EMS1S
+ RET
+;
+YMOVE HL=T11
+ DO B=4 A=1
+ !T1E HL++ HL+
+ UNTIL DEC(B)=0
+ DO B=4 A=2
+ !T1E HL++ HL+
+ UNTIL DEC(B)=0
+ RET
+;
+ARD   DEFS 8
+;
+AR    BC=ARD
+ HL=(HL) !XHL
+ HL=HL-40
+ A=(HL) (BC)=A
+ BC+ HL+
+ A=(HL) (BC)=A
+ BC+ HL=HL+38
+ A=(HL) (BC)=A
+ BC+ HL=HL+40
+ A=(HL) (BC)=A
+ BC+ HL=HL-37
+ A=(HL) (BC)=A
+ BC+ HL=HL+40
+ A=(HL) (BC)=A
+ BC+ HL=HL+38
+ A=(HL) (BC)=A
+ BC+ HL+
+ A=(HL) (BC)=A
+ RET
+;
+ARSD  DEFS 4
+;
+ARS   (ARSD)=0 (ARSD+1)=0
+ (ARSD+2)=0 (ARSD+3)=0
+ BC=ARD
+ HL=ARSD
+ DO A=4
+ [AF
+ A=(BC)
+ IF A<>0 THEN IF A<>6 GOTO ARSE1
+ BC+
+ A=(BC) BC-
+ IF A<>0 THEN IF A<>6 GOTO ARSE1
+ (HL)=1
+ARSE1 BC++ HL+
+ ]AF
+ UNTIL DEC(A)=0
+ RET
+;
+T1E1  HL=DE
+ HL=(HL)
+ A=(ARSD) IF A=1 THEN H- GOTO T1E1U
+ A=(ARSD+1) IF A=1 THEN L- GOTO T1E1L
+ A=(ARSD+3) IF A=1 THEN H+ GOTO T1E1D
+ A=(ARSD+2) IF A=1 THEN L+ GOTO T1E1R
+;
+T1E1D BC=HL
+ !XHL HL=HL+40
+ A=(HL) IF A=6 THEN (BOM)=1
+ HL+
+ A=(HL) IF A=6 THEN (BOM)=1
+ HL=DE HL=(HL)
+ (GX)=HL A=0 (GZ)=A !PUT
+ ]HL ]AF [AF [HL HL=BC
+ (GX)=HL (GZ)=A !PUT
+ HL<>DE (HL)=DE
+ ]HL ]AF ]BC
+ RET
+;
+T1E1R BC=HL
+ !XHL HL+
+ A=(HL) IF A=6 THEN (BOM)=1
+ HL=HL+40
+ A=(HL) IF A=6 THEN (BOM)=1
+ HL=DE HL=(HL)
+ (GX)=HL A=0 (GZ)=A !PUT
+ ]HL ]AF [AF [HL HL=BC
+ (GX)=HL (GZ)=A !PUT
+ HL<>DE (HL)=DE
+ ]HL ]AF ]BC
+ RET
+;
+T1E1U BC=HL
+ !XHL
+ A=(HL) IF A=6 THEN (BOM)=1
+ HL+
+ A=(HL) IF A=6 THEN (BOM)=1
+ HL=DE HL=(HL)
+ (GX)=HL A=0 (GZ)=A !PUT
+ ]HL ]AF [AF [HL HL=BC
+ (GX)=HL (GZ)=A !PUT
+ HL<>DE (HL)=DE
+ ]HL ]AF ]BC
+ RET
+;
+T1E1L BC=HL
+ !XHL
+ A=(HL) IF A=6 THEN (BOM)=1
+ HL=HL+40
+ A=(HL) IF A=6 THEN (BOM)=1
+ HL=DE HL=(HL)
+ (GX)=HL A=0 (GZ)=A !PUT
+ ]HL ]AF [AF [HL HL=BC
+ (GX)=HL (GZ)=A !PUT
+ HL<>DE (HL)=DE
+ ]HL ]AF ]BC
+ RET
+;
+TEC   HL++ (HL)=0
+ HL-- HL=(HL)
+ (GX)=HL
+ A=0 (GZ)=A
+ !SPUT
+ ]HL ]AF ]BC
+ RET
+;
+T1E   [BC [AF [HL
+ DE=HL HL++
+ A=(HL) HL--
+ IF A=0 THEN ]HL ]AF ]BC RET
+ IF A=2 GOTO TEC
+ !AR !ARS
+ HL=ARSD C=0
+ DO B=4
+ A=(HL)
+ A=A+C C=A
+ HL+
+ UNTIL DEC(B)=0
+ IF C=0 THEN ]HL ]AF ]BC RET
+ C- IF C=0 GOTO T1E1
+ HL=DE HL=(HL)
+ (HLS)=HL
+ ]HL ]AF [AF [HL
+ HL=(HLS)
+ IF A=1 GOTO T2E
+ A=(DE) B=A
+ A=(MYX)
+ IF A<>B GOTO T1ES
+ A=(+DE-)
+ B=A A=(MYY)
+ IF A>=B GOTO T1E0
+ A=(ARSD)
+ IF A=1 THEN H- GOTO T1E1U
+ GOTO T1ES
+T1E0  A=(ARSD+3)
+ IF A=1 THEN H+ GOTO T1E1D
+T1ES  A=(+DE-) B=A
+ A=(MYY)
+ IF A<>B GOTO RMOVE
+ A=(DE)
+ B=A A=(MYX)
+ IF A>=B GOTO T1E2
+ A=(ARSD+1)
+ IF A=1 THEN L- GOTO T1E1L
+ GOTO RMOVE
+T1E2  A=(ARSD+2)
+ IF A=1 THEN L+ GOTO T1E1R
+ GOTO RMOVE
+;
+HLS   DEFS 2
+;
+RND    [DE [HL
+ HL<>DE DE=(HL) DE<>HL
+ DE=HL HL=(RNDD)
+ HL=HL+DE
+ A=H A=A+L
+ L=A A=A+H
+ L=A DE=$36
+ HL=HL+DE (RNDD)=HL
+ A=L ]HL ]DE
+ RET
+;
+RNDD  !(1234)
+;
+RMOVE B=4
+RMOV1 HL=DE HL=(HL) !RND
+ IF DEC(B)=0 GOTO T1E1
+ IF A>=0 THEN IF A<$40 GOTO RM0
+ IF A>=$40 THEN IF A<$80 GOTO RM1
+ IF A>=$80 THEN IF A<$C0 GOTO RM2
+ GOTO RM3
+;
+RM0   A=(ARSD) IF A=1 THEN H- GOTO T1E1U
+ GOTO RMOV1
+;
+RM1   A=(ARSD+1) IF A=1 THEN L- GOTO T1E1L
+ GOTO RMOV1
+;
+RM2   A=(ARSD+2) IF A=1 THEN L+ GOTO T1E1R
+ GOTO RMOV1
+;
+RM3   A=(ARSD+3) IF A=1 THEN H+ GOTO T1E1D
+ GOTO RMOV1
+;
+T2E   A=(DE)
+ B=A A=(MYX)
+ IF A=B GOTO T2ES
+ IF A>=B GOTO T2E0
+ A=(ARSD+1)
+ IF A=1 THEN L- GOTO T1E1L
+ GOTO RMOVE
+T2E0  A=(ARSD+2)
+ IF A=1 THEN L+ GOTO T1E1R
+ GOTO RMOVE
+T2ES  A=(+DE-)
+ B=A A=(MYY)
+ IF A>=B GOTO T2E1
+ A=(ARSD)
+ IF A=1 THEN H- GOTO T1E1U
+ GOTO RMOVE
+T2E1  A=(ARSD+3)
+ IF A=1 THEN H+ GOTO T1E1D
+ GOTO RMOVE
+;
+VVC   [HL [BC [AF
+ HL=($1F78)
+ DO C=20 A=C A=A+3 (+HL-)=A
+ (HL)=1 DO B=38
+ A=" " !$1FF4
+ UNTIL DEC(B)=0
+ UNTIL DEC(C)=0
+ ]AF ]BC ]HL
+ RET
+;
+EDIT0 !(0C0D0D"  EDITOR COMMAND (1-5) ?"0D0D)
+ !("      1. EDIT"0D0D)
+ !("      2. DATA LOAD"0D0D)
+ !("      3. DATA SAVE"0D0D)
+ !("      4. DEVICE CHANGE"0D0D)
+ !("      5. END"00)
+;
+EDIT  (ED)=A
+ DE=EDIT0 !$1FE5 !WAIT
+ED0   !$1FD0
+ IF A="1" GOTO EDITR
+ IF A="2" GOTO LOAD
+ IF A="3" GOTO SAVE
+ IF A="4" GOTO B.C
+ IF A="5" GOTO DEMO
+ GOTO ED0
+;
+EDITL !(0C"** LOAD **"0D)
+EDITS !(0C"** SAVE **"0D)
+EDITV !(0C"** DEVICE CHANGE **"0D)
+EDITT !(0D0D0D"Ö³² ¶Þ ÃÞ·À× [CR] ¦ µ¼Ã¸ÀÞ»²¡"0D0D00)
+;
+SAVE  DE=EDITS !$1FE8
+ DE=EDITT !$1FE5
+SAVE0 !$1FD0 IF A<>13 GOTO SAVE0
+ A=4 DE=SAVED !$1FA3
+ HL=$3000 ($1F6E)=HL
+ DE=END   ($1F70)=DE
+ HL=$6F54 ($1F72)=HL
+ !$1FAF IF CY GOTO BREAK
+ !$1FAC IF CY GOTO BREAK
+ GOTO EDIT
+;
+SAVED !("XETTER 2/data"00)
+SKIP  !("Skip "0D)
+LING  !("Loading "0D)
+BRK   !("*Break"0D)
+PUCR  !("Push [CR] key."0D)
+OK    !("Ok !!"0D)
+;
+BREAK !$1FEE DE=BRK !$1FE8 !$1FC4
+BR2   !$1FEE DE=PUCR !$1FE8
+BR1   !$1FD0 IF A<>13 GOTO BR1
+ GOTO EDIT
+;
+LOAD  DE=EDITL !$1FE8
+ DE=EDITT !$1FE5
+LOAD0 !$1FD0 IF A<>13 GOTO LOAD0
+LOAD2 A=4 DE=SAVED !$1FA3
+ !$2009 IF CY GOTO ERROR
+ IF NZ GOTO LOAD1
+ HL=($1F72) DE=$6F54 HL=HL-DE
+ IF NZ GOTO LOAD1
+ DE=LING !$1FE8 DE=SAVED !$1FE5
+ HL=END ($1F70)=HL
+ !$1FA6 IF CY THEN !DCLR GOTO ERROR
+ GOTO EDIT
+;
+LOAD1 DE=SKIP !$1FE8 !$1F9D !$1FEE
+ !WAIT0 GOTO LOAD2
+;
+ERROR !$1FCD IF Z GOTO BREAK
+ !WAIT0 !$1FC4 GOTO BR2
+;
+B.C   DE=EDITV !$1FE8
+ DE=EDITB !$1FE5 !$2024 !$1FF4 DE=EDITC !$1FE5 DO B=175 !WAIT0 UNTIL DEC(B)=0
+VRFY0 !$1FD0 IF A=13 GOTO EDIT
+ IF A=0 GOTO VRFY0
+ !$2027 GOTO B.C
+;
+EDITB !(0D0D"   Now , DEVICE is "00)
+EDITC !(0D0D"   Push DEVICE key.")
+ !(0D0D"   If end , then 'Push [CR] key.'"00)
+;
+EDT1  HL=(MYX) RLC(H) RLC(L) (GX)=HL
+ !MPUT0 A=(HL) CY=0 A=A-$30 IF CY THEN A=0
+ (GZ)=A !PUT DO B=175 !WAIT0 UNTIL DEC(B)=0
+ RET
+;
+EDT9  HL=(MYX) RLC(H) RLC(L) (GX)=HL
+ (GZ)=8 !PUT DO B=175 !WAIT0 UNTIL DEC(B)=0
+ RET
+;
+EDITR !VC DE=EDITD
+ !$1FE5 !WAIT HL=($1F78) (HL)=33 HL+ (HL)=1 !COSK0
+EDT2  !S3
+ A=1 (MYX)=A
+EDT0  !EDT9 !EGET
+ !EDT1 !EGET
+ GOTO EDT0
+;
+EGET  ]HL
+ DO B=175 !$1FD0
+ IF A="M" GOTO CURD
+ IF A="H" GOTO CURL
+ IF A="K" GOTO CURR
+ IF A="U" GOTO CURU
+ IF A=" " GOTO CHR0
+ IF A="Z" GOTO CHR4
+ IF A="X" GOTO CHR5
+ IF A="C" GOTO CHR2
+ IF A="V" GOTO CHR1
+ IF A="B" GOTO CHR3
+ IF A="E" GOTO EDIT
+ IF A="+" GOTO MENU
+ IF A="-" GOTO MEND
+ IF A="!" GOTO SCRCL
+ UNTIL DEC(B)=0
+ [HL RET
+;
+CURD  !EDT1 A=(MYY) IF A=9 GOTO EDT0
+ A+ (MYY)=A GOTO EDT0
+;
+CURR  !EDT1 A=(MYX) IF A=18 GOTO EDT0
+ A+ (MYX)=A GOTO EDT0
+;
+CURU  !EDT1 A=(MYX) B=A A=(MYY)
+ IF A=1 THEN IF B=0 GOTO EDT0
+ IF A=0 GOTO EDT0
+ A- (MYY)=A GOTO EDT0
+;
+CURL  !EDT1 A=(MYY) B=A A=(MYX)
+ IF A=1 THEN IF B=0 GOTO EDT0
+ IF A=0 GOTO EDT0
+ A- (MYX)=A GOTO EDT0
+;
+MENU  A=(MEN) A+ IF A=251 THEN A=101
+ (MEN)=A GOTO EDT2
+;
+MEND  A=(MEN) A- IF A=100 THEN A=250
+ (MEN)=A GOTO EDT2
+;
+SCRCL !EDT1 A=0 (MYY)=A (GZ)=A A+ (MYX)=A
+SCRC0 !MGET A=(MYX) RLC(A) (GX)=A
+ A=(MYY) RLC(A) (GY)=A !PUT
+ !MPUT0 A=" " (HL)=A
+ A=(MYX) A+ (MYX)=A IF A<>19 GOTO SCRC0
+ A=0 (MYX)=A
+ A=(MYY) A+ (MYY)=A IF A<>10 GOTO SCRC0
+ A=0 (MYY)=A A+ (MYX)=A
+ GOTO EDT0
+;
+CHR0  !MGET A=(MYX) RLC(A) (GX)=A
+ A=(MYY) RLC(A) (GY)=A
+ A=0 (GZ)=A !PUT
+ A=" " GOTO MPUT
+;
+MPUT  AF<>AF' !MPUT0
+ AF<>AF' (HL)=A
+ GOTO EDT0
+;
+CHR1  !MGET A=(MYX) RLC(A) (GX)=A
+ A=(MYY) RLC(A) (GY)=A
+ A=5 (GZ)=A !PUT
+ A="5" GOTO MPUT
+;
+CHR2  CY=0 A=(CLR) A=A+4
+ IF CY GOTO EDT0
+ (CLR)=A !MGET
+ A=(MYX) RLC(A) (GX)=A
+ A=(MYY) RLC(A) (GY)=A
+ A=4 (GZ)=A !PUT
+ A="4" GOTO MPUT
+;
+CHR3  HL=IWA1-1 DO B=15 HL++ HL+
+ A=(HL) IF A=0 THEN A+ (HL)=A GOTO CHR30
+ UNTIL DEC(B)=0
+ GOTO EDT0
+CHR30 !MGET A=(MYX) RLC(A) (GX)=A A=(MYY)
+ RLC(A) (GY)=A A=3 (GZ)=A !PUT
+ A="3" GOTO MPUT
+;
+CHR4  HL=T11-1 DO B=4 HL++ HL+
+ A=(HL) IF A=0 THEN A+ (HL)=A GOTO CHR40
+ UNTIL DEC(B)=0
+ GOTO EDT0
+CHR40 !MGET A=(MYX) RLC(A) (GX)=A A=(MYY)
+ RLC(A) (GY)=A A=1 (GZ)=A !PUT
+ A="1" GOTO MPUT
+;
+CHR5  HL=T21-1 DO B=4 HL++ HL+
+ A=(HL) IF A=0 THEN A+ (HL)=A GOTO CHR50
+ UNTIL DEC(B)=0
+ GOTO EDT0
+CHR50 !MGET A=(MYX) RLC(A) (GX)=A A=(MYY)
+ RLC(A) (GY)=A A=2 (GZ)=A !PUT
+ A="2" GOTO MPUT
+;
+MPUT0 A=(MEN) A=A-100
+ HL=END-209 DE=190
+ DO B=A
+ HL=HL+DE
+ UNTIL DEC(B)=0
+ A=(MYX) B=0 C=A HL=HL+BC
+ A=(MYY) A+ DE=19
+ DO B=A
+ HL=HL+DE
+ UNTIL DEC(B)=0
+ RET
+;
+MGET  !MPUT0 A=(HL)
+ IF A=" " RET
+ IF A="5" RET
+ IF A="4" THEN A=(CLR) A=A-4 (CLR)=A RET
+ IF A="1" GOTO MGET0
+ IF A="2" GOTO MGET1
+ IF A<>"3" THEN HALT
+ HL=IWA1+2 DO B=14 HL++ HL+
+ A=(HL) IF A=0 THEN HL-- HL- GOTO MGET2
+ UNTIL DEC(B)=0
+MGET2 A=0 (HL)=A RET
+;
+MGET0 HL=T11+2 DO B=3 HL++ HL+
+ A=(HL) IF A=0 THEN HL-- HL- GOTO MGET2
+ UNTIL DEC(B)=0
+ GOTO MGET2
+;
+MGET1 HL=T21+2 DO B=3 HL++ HL+
+ A=(HL) IF A=0 THEN HL-- HL- GOTO MGET2
+ UNTIL DEC(B)=0
+ GOTO MGET2
+;
+ !("* K.Kuromusha Original No.12 *")
+ !("* This XETTER 2 is S-OS ver. *")
+;
+END
